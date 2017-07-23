@@ -49,9 +49,9 @@ try:
 
             for r in reply:
                 if r:
-                    if r[0][0].replace(' ', '') == u'推':
+                    if u'推' in r[0][0]:
                         push += 1
-                    elif r[0][0].replace(' ', '') == u'噓':
+                    elif u'噓' in r[0][0]:
                         sheee += 1
                     else:
                         arrow += 1
@@ -62,13 +62,12 @@ try:
                 print(arrow)
                 dbuse2 = DBConn()
                 dbuse2.dbConnect()
-                sql = "UPDATE Gossiping SET `push` = %d, `sheee` = %d, `arrow` = %d Where `pid` = %s" % (push, sheee, arrow, result[0])
+                sql = "UPDATE Gossiping SET `push` = %d, `sheee` = %d, `arrow` = %d Where `pid` = %s" % (
+                    push, sheee, arrow, result[0])
                 dbuse2.runUpdate(sql)
                 dbuse2.dbClose()
             except Exception:
                 pass
-                # print(reply)
-                # print(json.load(str(i[1]).dncode('utf-8')))
 
 except:
     exc_info = sys.exc_info()
