@@ -33,111 +33,115 @@
         <div class="container-fluid">
             <div class="navbar-header">
                 <a class="navbar-brand" href="">
-                PTT 鄉民檢索系統 beta 1.0
-            </a>
+                    PTT 鄉民檢索系統 beta 1.0
+                </a>
 
             </div>
             <div>
                 <ul class="nav navbar-nav navbar-right">
+                    <li><a data-toggle="tab" href="#"><span class="glyphicon glyphicon-user"></span> {{ user.username }}</a>
+                    </li>
+                    <li>
+                        <a href="/myFolder"> <span class="glyphicon glyphicon-list"> 資料夾</span></a>
+                    </li>
+
                     <li>
                         <a href="{% url 'logout' %}">
                             <span class="glyphicon glyphicon-log-out"></span> Log out</a>
                     </li>
-                    <li><a data-toggle="tab" href="#"><span class="glyphicon glyphicon-user"></span> {{ user.username }}</a>
-                    </li>
                 </ul>
             </div>
-    </nav>
-    <div class="col-sm-4 col-md-3 sidebar">
-        {% if request.user.is_authenticated %}
-        <ul class="nav nav-sidebar">
-            <form action="/" METHOD="post" id="finder">
-                {% csrf_token %}
-                <label for="exampleSelect2">時間檢索</label>
-                <div class="form-group">
-                    <h5>From</h5>
-                    <div class="form-group">
-                        <div class='input-group date' id='datetimepicker6'>
-                            <input type='text' class="form-control" id="start_day" name="start_day" />
-                            <span class="input-group-addon">
-                              <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                        <input type="hidden" id="dtp_input1" value="" /><br/>
-                    </div>
-                    <h5>To</h5>
-                    <div class="form-group">
-                        <div class='input-group date' id='datetimepicker7'>
-                            <input type='text' class="form-control" id="end_day" name="end_day" />
-                            <span class="input-group-addon">
-                   <span class="glyphicon glyphicon-calendar"></span>
-                            </span>
-                        </div>
-                        <input type="hidden" id="dtp_input1" value="" /><br/>
-                    </div>
-                    <div class="form-group">
-                        <label for="exampleSelect2">文章分類</label>
-                        <select class="form-control" id="articleClass" name="articleClass">
-                        <option>[全選]</option>
-                        <option>[公告]</option>
-                        <option>[新聞]</option>
-                        <option>[爆卦]</option>
-                        <option>[問卦]</option>
-                        <option>[ＦＢ]</option>
-                    </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="arthorID">作者 ID</label>
-                        <input type="text" class="form-control" name="arthorID" id="arthorID" placeholder="輸入作者ID">
-                    </div>
-                    <div class="form-group">
-                        <label for="keyword1">關鍵字(AND)</label>
-                        <div class="input_fields_wrap1 ">
-                            <div class="col-sm-10"><input type="text" class="form-control" name="keywordAND[]" id="keyword1" placeholder="關鍵字(AND)" required="required"></div>
-                            <div class="col-sm-2"><span class="glyphicon glyphicon-plus add_field_button1" style="font-size: 20px;"></span></div>
-                        </div>
-                    </div>
-                    <br/>
-                    <br/>
-                    <div class="form-group">
-                        <label for="keyword1">關鍵字(OR)</label>
-                        <div class="input_fields_wrap2 ">
-                            <div class="col-sm-10"><input type="text" class="form-control" name="keywordOR[]" id="keyword1" placeholder="關鍵字(OR)" required="required"></div>
-                            <div class="col-sm-2"><span class="glyphicon glyphicon-plus add_field_button2" style="font-size: 20px;"></span></div>
-                        </div>
-                    </div>
-                    <br/>
-                    <br/>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-            </form>
-        </ul>
-        <br />
         </nav>
-        <form action="/add_new_keyword/" METHOD="post" id="finder">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="new_word">新增關鍵字</label>
-                <input type="text" class="form-control" name="new_word" id="new_word" placeholder="輸入新關鍵字">
-            </div>
-            <div class="form-group">
-                <label for="exampleSelect2">類別</label>
-                <select class="form-control" id="keywordClass" name="keywordClass">
-                    <option>人名</option>
-                    <option>地名</option>
-                    <option>火星文</option>
-                    <option>時事</option>
-                    <option>鄉民專用詞</option>
-                    <option>潮流</option>
-                    <option>其他</option>
-                </select>
-            </div>
-            <button type="submit" class="btn btn-success">Submit</button>&nbsp&nbsp{%if add_sucess == 1 %}<label style="color:green">成功</label>{% elif add_sucess == 0 %}<label style="color:blue">失敗囉XD（有人比你先）</label>{% endif %}
-        </form>
-        <nav aria-label="...">
-            <ul class="pager">
-                <li class="previous"><span aria-hidden="true" onclick="history.back()">&larr; Older</span></li>
-            </ul>
+        <div class="col-sm-4 col-md-3 sidebar">
+            {% if request.user.is_authenticated %}
+            <ul class="nav nav-sidebar">
+                <form action="/" METHOD="post" id="finder">
+                    {% csrf_token %}
+                    <label for="exampleSelect2">時間檢索</label>
+                    <div class="form-group">
+                        <h5>From</h5>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker6'>
+                                <input type='text' class="form-control" id="start_day" name="start_day" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                            <input type="hidden" id="dtp_input1" value="" /><br/>
+                        </div>
+                        <h5>To</h5>
+                        <div class="form-group">
+                            <div class='input-group date' id='datetimepicker7'>
+                                <input type='text' class="form-control" id="end_day" name="end_day" />
+                                <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+                                </span>
+                            </div>
+                            <input type="hidden" id="dtp_input1" value="" /><br/>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleSelect2">文章分類</label>
+                            <select class="form-control" id="articleClass" name="articleClass">
+                                <option>[全選]</option>
+                                <option>[公告]</option>
+                                <option>[新聞]</option>
+                                <option>[爆卦]</option>
+                                <option>[問卦]</option>
+                                <option>[ＦＢ]</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="arthorID">作者 ID</label>
+                            <input type="text" class="form-control" name="arthorID" id="arthorID" placeholder="輸入作者ID">
+                        </div>
+                        <div class="form-group">
+                            <label for="keyword1">關鍵字(AND)</label>
+                            <div class="input_fields_wrap1 ">
+                                <div class="col-sm-10"><input type="text" class="form-control" name="keywordAND[]" id="keyword1" placeholder="關鍵字(AND)" required="required"></div>
+                                <div class="col-sm-2"><span class="glyphicon glyphicon-plus add_field_button1" style="font-size: 20px;"></span></div>
+                            </div>
+                        </div>
+                        <br/>
+                        <br/>
+                        <div class="form-group">
+                            <label for="keyword1">關鍵字(OR)</label>
+                            <div class="input_fields_wrap2 ">
+                                <div class="col-sm-10"><input type="text" class="form-control" name="keywordOR[]" id="keyword1" placeholder="關鍵字(OR)" required="required"></div>
+                                <div class="col-sm-2"><span class="glyphicon glyphicon-plus add_field_button2" style="font-size: 20px;"></span></div>
+                            </div>
+                        </div>
+                        <br/>
+                        <br/>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </ul>
+                <br />
+            </nav>
+            <form action="/add_new_keyword/" METHOD="post" id="finder">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="new_word">新增關鍵字</label>
+                    <input type="text" class="form-control" name="new_word" id="new_word" placeholder="輸入新關鍵字">
+                </div>
+                <div class="form-group">
+                    <label for="exampleSelect2">類別</label>
+                    <select class="form-control" id="keywordClass" name="keywordClass">
+                        <option>人名</option>
+                        <option>地名</option>
+                        <option>火星文</option>
+                        <option>時事</option>
+                        <option>鄉民專用詞</option>
+                        <option>潮流</option>
+                        <option>其他</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success">Submit</button>&nbsp&nbsp{%if add_sucess == 1 %}<label style="color:green">成功</label>{% elif add_sucess == 0 %}<label style="color:blue">失敗囉XD（有人比你先）</label>{% endif %}
+            </form>
+            <nav aria-label="...">
+                <ul class="pager">
+                    <li class="previous"><span aria-hidden="true" onclick="history.back()">&larr; Older</span></li>
+                </ul>
 
             </div>
             {% endif %}
@@ -199,4 +203,4 @@
                 });
             </script>
 
-    </div>
+        </div>

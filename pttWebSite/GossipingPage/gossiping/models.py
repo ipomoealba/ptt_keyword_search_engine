@@ -4,43 +4,166 @@
 #   * Make sure each model has one field with primary_key=True
 #   * Make sure each ForeignKey has `on_delete` set to the desired behavior.
 #   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or
-# field names.
+# Feel free to rename the models, but don't rename db_table values or field names.
 from __future__ import unicode_literals
-from datetime import date
+
 from django.db import models
 
 
-class Content(models.Model):
-    pid = models.CharField(max_length=50, primary_key=True)
-    content = models.TextField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'Content'
-
-
-class Gossiping(models.Model):
-    pid = models.CharField(max_length=50, primary_key=True)
-    title = models.CharField(max_length=100, blank=True, null=True)
-    ptime = models.DateTimeField(blank=True, null=True)
-    arthor = models.CharField(max_length=30, blank=True, null=True)
+class BiSexual(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    title = models.CharField(max_length=100)
+    ptime = models.DateTimeField()
+    arthor = models.CharField(max_length=30)
     ip = models.CharField(max_length=16, blank=True, null=True)
     content_keywords = models.TextField(blank=True, null=True)
     comment_keywords = models.TextField(blank=True, null=True)
     push = models.IntegerField(blank=True, null=True)
     sheee = models.IntegerField(blank=True, null=True)
     arrow = models.IntegerField(blank=True, null=True)
-    first_page = models.IntegerField(blank=True, null=True)
-    relink = models.IntegerField(blank=True, null=True)
+    first_page = models.IntegerField()
+    relink = models.IntegerField()
+    board = models.CharField(max_length=15, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Bi_sexual'
+
+
+class BiSexualContent(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    content = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Bi_sexual_Content'
+
+
+class BiSexualReply(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    reply = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Bi_sexual_Reply'
+
+
+class FeminineSex(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    title = models.CharField(max_length=100)
+    ptime = models.DateTimeField()
+    arthor = models.CharField(max_length=30)
+    ip = models.CharField(max_length=16, blank=True, null=True)
+    content_keywords = models.TextField(blank=True, null=True)
+    comment_keywords = models.TextField(blank=True, null=True)
+    push = models.IntegerField(blank=True, null=True)
+    sheee = models.IntegerField(blank=True, null=True)
+    arrow = models.IntegerField(blank=True, null=True)
+    first_page = models.IntegerField()
+    relink = models.IntegerField()
+    board = models.CharField(max_length=15, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Feminine_Sex'
+
+
+class FeminineSexContent(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    content = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Feminine_Sex_Content'
+
+
+class FeminineSexReply(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    reply = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Feminine_Sex_Reply'
+
+
+class Gay(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    title = models.CharField(max_length=100)
+    ptime = models.DateTimeField()
+    arthor = models.CharField(max_length=30)
+    ip = models.CharField(max_length=16, blank=True, null=True)
+    content_keywords = models.TextField(blank=True, null=True)
+    comment_keywords = models.TextField(blank=True, null=True)
+    push = models.IntegerField(blank=True, null=True)
+    sheee = models.IntegerField(blank=True, null=True)
+    arrow = models.IntegerField(blank=True, null=True)
+    first_page = models.IntegerField()
+    relink = models.IntegerField()
+    board = models.CharField(max_length=15, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Gay'
+
+
+class GayContent(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    content = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Gay_Content'
+
+
+class GayReply(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    reply = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Gay_Reply'
+
+
+class Gossiping(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    title = models.CharField(max_length=100)
+    ptime = models.DateTimeField()
+    arthor = models.CharField(max_length=30)
+    ip = models.CharField(max_length=16, blank=True, null=True)
+    content_keywords = models.TextField(blank=True, null=True)
+    comment_keywords = models.TextField(blank=True, null=True)
+    push = models.IntegerField(blank=True, null=True)
+    sheee = models.IntegerField(blank=True, null=True)
+    arrow = models.IntegerField(blank=True, null=True)
+    first_page = models.IntegerField()
+    relink = models.IntegerField()
+    board = models.CharField(max_length=15, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'Gossiping'
 
 
+class GossipingContent(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    content = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Gossiping_Content'
+
+
+class GossipingReply(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    reply = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Gossiping_Reply'
+
+
 class Keywords(models.Model):
-    pid = models.CharField(max_length=50, primary_key=True)
+    pid = models.CharField(primary_key=True, max_length=30)
     content_keywords = models.TextField(blank=True, null=True)
     comment_keywords = models.TextField(blank=True, null=True)
 
@@ -49,13 +172,53 @@ class Keywords(models.Model):
         db_table = 'Keywords'
 
 
-class Reply(models.Model):
-    pid = models.CharField(max_length=50, primary_key=True)
+class Newkeywords(models.Model):
+    id = models.CharField(primary_key=True, max_length=40)
+    date = models.DateTimeField()
+    keyword = models.CharField(max_length=50)
+    category = models.CharField(max_length=10)
+
+    class Meta:
+        managed = False
+        db_table = 'Newkeywords'
+
+
+class Sex(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    title = models.CharField(max_length=100)
+    ptime = models.DateTimeField()
+    arthor = models.CharField(max_length=30)
+    ip = models.CharField(max_length=16, blank=True, null=True)
+    content_keywords = models.TextField(blank=True, null=True)
+    comment_keywords = models.TextField(blank=True, null=True)
+    push = models.IntegerField(blank=True, null=True)
+    sheee = models.IntegerField(blank=True, null=True)
+    arrow = models.IntegerField(blank=True, null=True)
+    first_page = models.IntegerField()
+    relink = models.IntegerField()
+    board = models.CharField(max_length=15, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Sex'
+
+
+class SexContent(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
+    content = models.TextField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Sex_Content'
+
+
+class SexReply(models.Model):
+    pid = models.CharField(primary_key=True, max_length=32)
     reply = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'Reply'
+        db_table = 'Sex_Reply'
 
 
 class AuthGroup(models.Model):
@@ -130,8 +293,7 @@ class DjangoAdminLog(models.Model):
     object_repr = models.CharField(max_length=200)
     action_flag = models.SmallIntegerField()
     change_message = models.TextField()
-    content_type = models.ForeignKey(
-        'DjangoContentType', models.DO_NOTHING, blank=True, null=True)
+    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
     user = models.ForeignKey(AuthUser, models.DO_NOTHING)
 
     class Meta:
@@ -169,12 +331,12 @@ class DjangoSession(models.Model):
         db_table = 'django_session'
 
 
-class NewKeywords(models.Model):
-    id = models.CharField(max_length=40, primary_key=True)
-    date = models.DateTimeField(auto_now_add=True)
-    keyword = models.CharField(max_length=50)
-    category = models.CharField(max_length=10)
+class UserSavePost(models.Model):
+    pid = models.CharField(max_length=45)
+    datasetclass = models.CharField(db_column='dataSetClass', max_length=45)  # Field name made lowercase.
+    createtime = models.DateTimeField(auto_now_add=True)
+    user_id = models.CharField(max_length=45)
 
     class Meta:
         managed = False
-        db_table = 'Newkeywords'
+        db_table = 'user_save_post'

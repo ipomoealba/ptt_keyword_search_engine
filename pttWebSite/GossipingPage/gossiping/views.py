@@ -16,7 +16,7 @@ from datetime import datetime
 from django.contrib.auth import authenticate
 from datetime import timedelta, date, datetime
 from django.shortcuts import render, render_to_response, redirect
-from .models import Gossiping, Content, Keywords, Reply, NewKeywords
+from .models import UserSavePost, Gossiping, GossipingContent, Keywords, GossipingReply, Newkeywords
 from django.db.models import Q
 from GossipingPage import settings
 from django.http import HttpResponse, HttpResponseRedirect
@@ -25,6 +25,25 @@ from django.contrib.auth.decorators import login_required
 from operator import __or__ as OR
 from operator import __and__ as AND
 from hashlib import md5
+
+@login_required
+def myFolder(request):
+    if request.POST:
+        user_id = request.user.id
+        
+
+@login_required
+def save_post(request):
+    if request.POST:
+        user_id = request.user.id
+        data = request.POST.getlist("posts[]")
+        dataset_name = request.POST.get("dataset_name")
+        print(user_id, data, dataset_name)
+        for p in data:
+            s = UserSavePost(pid=p, user_id=user_id, datasetclass=dataset_name)
+            s.save()
+        payload = {'success': True}
+    return HttpResponse(json.dumps(payload), content_type='application/json')
 
 
 @login_required
@@ -38,10 +57,6 @@ def home(request):
         arthor = request.POST['arthorID']
         keywordANDs = request.POST.getlist('keywordAND[]')
         keywordORs = request.POST.getlist('keywordOR[]')
-        if " " in keywordANDs:
-            keywordANDs.remove(" ")
-        if " " in keywordORs:
-            keywordORs.remove(" ")
         article_class = request.POST['articleClass']
         sql_query = []
         or_query = []
@@ -89,79 +104,61 @@ def home(request):
             raw_data = Gossiping.objects.filter(reduce(OR, or_query))
         # print([r.ptime.date() for r in raw_data])
         month_date_freq = {}
-        week_date_freq= {}
-        month_all_date_freq = {}
-        week_all_date_freq = {}
-        all_keywords = keywordANDs + keywordORs
+        week_date_freq = {}
         # numdays = 30
         if new_start_time:
             base = new_end_time
         else:
             base = datetime.today()
-        month_date_freq["all"] = {}
-        week_date_freq["all"] = {}
-        for k in all_keywords:
-            month_date_freq[u''.join(k)] = {}
-            week_date_freq[u''.join(k)] = {}
-            for x in range(0, 30):
-                month_date_freq["all"][(base - timedelta(days=x)).date()] = 0
-                month_date_freq[k][(base - timedelta(days=x)).date()] = 0
-            for x in range(0, 7):
-                week_date_freq["all"][(base - timedelta(days=x)).date()] = 0
-                week_date_freq[k][(base - timedelta(days=x)).date()] = 0
-
+        for x in range(0, 30):
+            month_date_freq[(base - timedelta(days=x)).date()] = 0
+        for x in range(0, 7):
+            week_date_freq[(base - timedelta(days=x)).date()] = 0
+        # print(date_list)
         for r in raw_data:
-            for k in month_date_freq.keys():
-                if k in r.title:
-                    if r.ptime.date() in list(month_date_freq['all'].keys()):
-                        month_date_freq[k][r.ptime.date()] += 1
-                    if r.ptime.date() in list(week_date_freq['all'].keys()):
-                        week_date_freq[k][r.ptime.date()] += 1
-                 
-            if r.ptime.date() in list(month_date_freq["all"].keys()):
-                month_date_freq["all"][r.ptime.date()] = month_date_freq["all"][
+            if r.ptime.date() in list(month_date_freq.keys()):
+                month_date_freq[r.ptime.date()] = month_date_freq[
                     r.ptime.date()] + 1
-            
-            if r.ptime.date() in list(week_date_freq["all"].keys()):
-                week_date_freq["all"][r.ptime.date()] = week_date_freq["all"][
+            if r.ptime.date() in list(week_date_freq.keys()):
+                week_date_freq[r.ptime.date()] = week_date_freq[
                     r.ptime.date()] + 1
 
         def sort_dict_data(data):
             return OrderedDict((datetime.strftime(k, '%d-%m-%Y'), v)
                                for k, v in sorted(data.iteritems()))
-        for k in month_date_freq.keys():
-            month_date_freq[k] = sort_dict_data(month_date_freq[k])
-        for k in week_date_freq.keys():
-            week_date_freq[k] = sort_dict_data(week_date_freq[k])    
-        # week_date_freq["all"] = sort_dict_data(week_all_date_freq)
-        print(month_date_freq)
+        all_month_date_freq = sort_dict_data(month_date_freq)
+        all_week_date_freq = sort_dict_data(week_date_freq)
         filename = str(uuid.uuid1())
-        month_data_file = os.path.join(
+        all_content_data_file = os.path.join(
             "cache/data/month/" + filename + ".json")
-        week_data_file = os.path.join(
+        all_reply_data_file = os.path.join(
             "cache/data/week/" + filename + ".json")
-        with open(month_data_file, 'w') as outfile:
-            json.dump(month_date_freq, outfile,
+        with open(all_content_data_file, 'w') as outfile:
+            json.dump(all_month_date_freq, outfile,
                       default=json_util.default)
-        with open(week_data_file, 'w') as outfile:
-            json.dump(week_date_freq, outfile, default=json_util.default)
+        with open(all_reply_data_file, 'w') as outfile:
+            json.dump(all_week_date_freq, outfile, default=json_util.default)
         code_file = os.path.join('lib/graph.py')
         process_month = subprocess.Popen(
-            ['python2', code_file, str(month_date_freq), filename, "month"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ['python2', code_file, str(all_month_date_freq), filename, "month"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         out1, err1 = process_month.communicate()
         process_week = subprocess.Popen(
-            ['python2', code_file, str(week_date_freq), filename, "week"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ['python2', code_file, str(all_week_date_freq), filename, "week"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         out2, err2 = process_week.communicate()
-        print(out1, out2)
+        print(out1 + "\n" + out2)
         print(err1, err2)
         content_result = {}
         reply_result = {}
         for i in raw_data:
             content_keywords = i.content_keywords
             reply_keywords = i.comment_keywords
-
+            if i.sheee == None or i.arrow == None or i.push == None:
+                i.all_reply = "err"
+            else:
+                i.all_reply = i.sheee+i.push+i.arrow
+            print(i.all_reply)
             for ck in content_keywords[2:len(content_keywords) - 2].split('], ['):
                 ckeyword = ck.split(', ')
                 if ckeyword[0] in content_result:
@@ -189,7 +186,6 @@ def home(request):
             _all_reply_counter = d[:10]
         if t != {}:
             _all_content_counter = t[:10]
-
         img_list = os.path.join("cache/urls/" + filename + ".txt")
         urls = {"all_content": "static/cache/img/month/" + filename + ".png",
                 "all_reply": "static/cache/img/week/" + filename + ".png", }
@@ -220,11 +216,11 @@ def add_new_keyword(request):
             new_word = request.POST['new_word']
             print(new_word)
             try:
-                tmp = NewKeywords.objects.get(keyword=new_word)
+                tmp = Newkeywords.objects.get(keyword=new_word)
                 print("this data was in the db")
-            except NewKeywords.DoesNotExist:
+            except Newkeywords.DoesNotExist:
                 kid = _get_urlmd5id(new_word.encode('utf-8'))
-                k = NewKeywords(id=kid, keyword=new_word.encode('utf-8'),
+                k = Newkeywords(id=kid, keyword=new_word.encode('utf-8'),
                                 category=keyword_class)
                 k.save()
         except Exception as e:
@@ -249,7 +245,7 @@ def result(request):
             reply_result = Counter()
             re_content_result = Counter()
             re_reply_result = Counter()
-            reply_raw = Reply.objects.get(pid=request.GET['pid']).reply
+            reply_raw = GossipingReply.objects.get(pid=request.GET['pid']).reply
             for ck in content_keywords[2:len(content_keywords) - 2].split('], ['):
                 ckeyword = ck.split(', ')
                 if ckeyword[0] in content_result:
@@ -327,7 +323,7 @@ def result(request):
             ), key=operator.itemgetter(1), reverse=True)[:25]
             post.re_sorted_reply = sorted(re_reply_result.items(
             ), key=operator.itemgetter(1), reverse=True)[:50]
-            post.content = Content.objects.get(pid=request.GET['pid']).content
+            post.content = GossipingContent.objects.get(pid=request.GET['pid']).content
             print(post.push)
             return render(request, 'result.html', {'post': post, 're_post': re_post, 'reply': reply})
         else:
