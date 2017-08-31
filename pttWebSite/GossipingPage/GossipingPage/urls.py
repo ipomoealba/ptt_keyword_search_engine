@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
-from gossiping.views import home, result, add_new_keyword, save_post
+from gossiping.views import home, result, add_new_keyword, save_post, myFolder
 from django.contrib.auth.views import login, logout
 
 urlpatterns = [
@@ -24,6 +24,7 @@ urlpatterns = [
     url(r'^add_new_keyword/$', add_new_keyword),
     url(r'^result/$', result),
     url(r'^save_post', save_post),
+    url(r'^myFolder', myFolder),
     url(r'^accounts/login/$', login, name='login'),
     url(r'^accounts/logout/$', logout,
         name='logout', kwargs={'next_page': '/'}),

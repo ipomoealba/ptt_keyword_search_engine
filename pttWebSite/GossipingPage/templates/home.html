@@ -21,8 +21,20 @@
                     <h4 class="modal-title">儲存資料集</h4>
                 </div>
                 <div class="modal-body">
+
                     <label>新增資料集名稱</label><br>
                     <input type="text" name="dataset_name" class="form-control"></input>
+                    {% if post_classes %}
+                    <label for="">儲存至...</label>
+                    <select class="selectpicker" multiple>
+                        {% for post_class in post_classes %}
+                        <option>{{post_class}}</option>
+
+                        {% endfor %}
+                    </select>
+
+                    {% endif %}
+
                 </div>
                 <div class="modal-footer">
 
@@ -129,7 +141,7 @@
         <tbody>
             {% for post in all_data %} {% if post.first_page != 1 %} {% else %}
             <tr>
-                <td data-th="title" width="20"> <input type="checkbox" value="{{post.pid}}" name="postItem"></td>
+                <td data-th="title" width="20"> <input type="checkbox" value="{{post.pid}}||{{post.title}}" name="postItem"></td>
 
                 <td data-th="title" width="280">{{ post.title }}</td>
                 <td data-th="ptime" width="180">{{ post.ptime }}</td>
@@ -151,64 +163,65 @@
     </table>
     {% endif %}
     <!--
-        {% if all_content_counter %}
-        <div>
+    {% if all_content_counter %}
+    <div>
         <div class="col-md-2"><strong>全文累計關鍵字 </strong><br></div>
         <div class="col-md-10">
-        {% for i in all_content_counter %} ({% for x in i %} {{ x }} {% endfor %}) {% endfor %}
+            {% for i in all_content_counter %} ({% for x in i %} {{ x }} {% endfor %}) {% endfor %}
         </div>
 
-        </div>
-        {% endif %}{% if all_reply_counter %}
-        <div>
+    </div>
+    {% endif %}{% if all_reply_counter %}
+    <div>
         <div class="col-md-2"><strong>回覆累計關鍵字 </strong><br>
 
         </div>
         <div class="col-md-10">
-        {% for i in all_reply_counter %} ({% for x in i %} {{ x }} {% endfor %}) {% endfor %}
+            {% for i in all_reply_counter %} ({% for x in i %} {{ x }} {% endfor %}) {% endfor %}
         </div>
 
-        </div>
-        {% endif %}
+    </div>
+    {% endif %}
     -->
 </div>
 <script>
-$(document).ready(function() {
-    var table = $('#dataTables-main').DataTable();
-    $('#dataTables-main tbody').on( 'click', 'tr', function () {
-        $(this).toggleClass('selected');
-    } );
-    
-    $("#selectAll").click(function(){
-        console.log("checkAll");
-        var checkBoxes = $('input[name=postItem]');
-        checkBoxes.prop('checked', !checkBoxes.prop("checked"));
-    });
-    $.ajaxSetup({
-        data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
-    });
-    $('#save').click( function () {
-        alert( table.rows('.selected').data().length +' row(s) selected' );
-    } );
-    
-    $('#send_data').on('click', function(e){
-        console.log("test");
-        var postItems = new Array();
-        $("input[name=postItem]:checked").each(function() {
-            postItems.push($(this).val());
-        });
-        console.log(postItems)
-        $.post(
-            '/save_post', { 
-                'posts': postItems,
-                'dataset_name': $('input[name=dataset_name]').val()
-            }, function () {
-                $('.success_msg').append("Vote Successfully Recorded").fadeOut();
-            }
-        );
-        event.preventDefault();
+    $(document).ready(function() {
+        var table = $('#dataTables-main').DataTable();
+        $('#dataTables-main tbody').on( 'click', 'tr', function () {
+            $(this).toggleClass('selected');
+        } );
 
+        $("#selectAll").click(function(){
+            console.log("checkAll");
+            var checkBoxes = $('input[name=postItem]');
+            checkBoxes.prop('checked', !checkBoxes.prop("checked"));
+        });
+        $.ajaxSetup({
+            data: {csrfmiddlewaretoken: '{{ csrf_token }}' },
+        });
+        $('#save').click( function () {
+            alert( table.rows('.selected').data().length +' row(s) selected' );
+        } );
+
+        $('#send_data').on('click', function(e){
+            console.log("test");
+            var postItems = new Array();
+            $("input[name=postItem]:checked").each(function() {
+                postItems.push($(this).val());
+            });
+            console.log(postItems)
+            $.post(
+                '/save_post', {
+                    'posts': postItems,
+                    'dataset_name': $('input[name=dataset_name]').val()
+                }, function () {
+                    $('.success_msg').append("Vote Successfully Recorded").fadeOut();
+                    alert("已儲存！")
+                }
+            );
+            event.preventDefault();
+
+        });
     });
-});
 </script>
 {% include 'footer.html' %}

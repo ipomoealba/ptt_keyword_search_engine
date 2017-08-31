@@ -8,6 +8,7 @@ import operator
 import sys
 import traceback
 import subprocess
+import logging
 
 from functools import reduce
 from collections import OrderedDict
@@ -26,11 +27,23 @@ from operator import __or__ as OR
 from operator import __and__ as AND
 from hashlib import md5
 
+logger = logging.getLogger(__name__)
+
 @login_required
 def myFolder(request):
     if request.POST:
         user_id = request.user.id
+        user_save_post = UserSavePost.objects.filter(user_id=user_id)
+        user_save_post_class = []
+        for u in user_save_post:
+            user_save_post_class.append(u.class_id)
         
+        return render(request, "myFolder.html", {
+            "user_save_post_class": set(user_save_post_class),
+            "user_save_post":user_save_post
+
+            })
+    return HttpResponse(status=404)
 
 @login_required
 def save_post(request):
@@ -38,9 +51,11 @@ def save_post(request):
         user_id = request.user.id
         data = request.POST.getlist("posts[]")
         dataset_name = request.POST.get("dataset_name")
-        print(user_id, data, dataset_name)
+        logger.info("[%s] Save Data (%s) to %s " % (user_id, data, dataset_name))
         for p in data:
-            s = UserSavePost(pid=p, user_id=user_id, datasetclass=dataset_name)
+            pid = p.split("||")[0]
+            post_name = p.split("||")[1]
+            s = UserSavePost(pid=pid, user_id=user_id,class_id=dataset_name, post_name=post_name)
             s.save()
         payload = {'success': True}
     return HttpResponse(json.dumps(payload), content_type='application/json')
@@ -190,10 +205,13 @@ def home(request):
         urls = {"all_content": "static/cache/img/month/" + filename + ".png",
                 "all_reply": "static/cache/img/week/" + filename + ".png", }
         print(urls)
+        post_classes = [u.class_id for u in UserSavePost.objects.filter(user_id=request.user.id)]
+        print(post_classes)
         return render(request, 'home.html', {'all_data': raw_data,
                                              'all_reply_counter': _all_reply_counter[:100],
                                              'all_content_counter': _all_content_counter[:200],
-                                             'urls': urls
+                                             'urls': urls,
+                                             'post_classes': set(post_classes)
                                              })
 
     else:

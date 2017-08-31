@@ -125,7 +125,7 @@ class GayReply(models.Model):
 
 
 class Gossiping(models.Model):
-    pid = models.CharField(primary_key=True, max_length=32)
+    pid = models.CharField(primary_key=True, max_length=30)
     title = models.CharField(max_length=100)
     ptime = models.DateTimeField()
     arthor = models.CharField(max_length=30)
@@ -145,7 +145,7 @@ class Gossiping(models.Model):
 
 
 class GossipingContent(models.Model):
-    pid = models.CharField(primary_key=True, max_length=32)
+    pid = models.CharField(primary_key=True, max_length=30)
     content = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -154,7 +154,7 @@ class GossipingContent(models.Model):
 
 
 class GossipingReply(models.Model):
-    pid = models.CharField(primary_key=True, max_length=32)
+    pid = models.CharField(primary_key=True, max_length=30)
     reply = models.TextField(blank=True, null=True)
 
     class Meta:
@@ -219,6 +219,19 @@ class SexReply(models.Model):
     class Meta:
         managed = False
         db_table = 'Sex_Reply'
+
+
+class UserSavePost(models.Model):
+    pid = models.CharField(max_length=32)
+    user_id = models.CharField(max_length=32)
+    class_id = models.CharField(max_length=100)
+    updated = models.DateTimeField()
+    created = models.DateTimeField()
+    post_name = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'User_Save_Post'
 
 
 class AuthGroup(models.Model):
@@ -329,14 +342,3 @@ class DjangoSession(models.Model):
     class Meta:
         managed = False
         db_table = 'django_session'
-
-
-class UserSavePost(models.Model):
-    pid = models.CharField(max_length=45)
-    datasetclass = models.CharField(db_column='dataSetClass', max_length=45)  # Field name made lowercase.
-    createtime = models.DateTimeField(auto_now_add=True)
-    user_id = models.CharField(max_length=45)
-
-    class Meta:
-        managed = False
-        db_table = 'user_save_post'

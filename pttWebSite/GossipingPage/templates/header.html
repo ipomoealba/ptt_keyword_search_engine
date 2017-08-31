@@ -42,9 +42,13 @@
                     <li><a data-toggle="tab" href="#"><span class="glyphicon glyphicon-user"></span> {{ user.username }}</a>
                     </li>
                     <li>
-                        <a href="/myFolder"> <span class="glyphicon glyphicon-list"> 資料夾</span></a>
+                        <form action="/myFolder"method="post">
+                            {%csrf_token%}
+                            <a href="javascript:;" onclick="parentNode.submit();">
+                                <span class="glyphicons glyphicons-notes-2">資料夾</span>
+                            </a>
+                        </form>
                     </li>
-
                     <li>
                         <a href="{% url 'logout' %}">
                             <span class="glyphicon glyphicon-log-out"></span> Log out</a>
@@ -203,4 +207,3 @@
                 });
             </script>
 
-        </div>
