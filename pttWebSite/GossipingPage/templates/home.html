@@ -1,4 +1,6 @@
 {% load staticfiles %} {% include 'header.html' %} {{ query }}
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
 <div class="col-md-9">
     <!-- Trigger the modal with a button -->
 
@@ -22,18 +24,22 @@
                 </div>
                 <div class="modal-body">
 
-                    <label>新增資料集名稱</label><br>
-                    <input type="text" name="dataset_name" class="form-control"></input>
-                    {% if post_classes %}
-                    <label for="">儲存至...</label>
-                    <select class="selectpicker" multiple>
-                        {% for post_class in post_classes %}
-                        <option>{{post_class}}</option>
+                    <div class="container">
+                        <label>新增資料集名稱</label><br>
+                        <input type="text" name="dataset_name" class="form-control" required></input>
+                    </div>
+                    <br/>
+                    <div class="container">
+                        {% if post_classes %}
+                        <label for="">儲存至...&nbsp </label>
+                        <select class="selectpicker" multiple id="select_class">
+                            {% for post_class in post_classes %}
+                            <option value="{{post_class}}">{{post_class}}</option>
+                            {% endfor %}
+                        </select>
 
-                        {% endfor %}
-                    </select>
-
-                    {% endif %}
+                        {% endif %}
+                    </div>
 
                 </div>
                 <div class="modal-footer">
@@ -150,7 +156,7 @@
                 <td data-th="content" width="100">
                     <ul class="pager">
                         {% if '[Re]' in post.title %}
-                        <li class="next"><a href="/result/?pid={{ post.pid }}">全文&nbsp{{post.relink|add:"-1"}}</a></li>
+                        <li class="next"><a href="/result/?pid={{ post.pid }}"> 全文&nbsp {{post.relink|add:"-1"}} </a></li>
                         {% else %}
                         <li class="next"><a href="/result/?pid={{ post.pid }}">全文&nbsp{{post.relink}}</a></li>
                         {% endif %}
@@ -184,6 +190,8 @@
     {% endif %}
     -->
 </div>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
 <script>
     $(document).ready(function() {
         var table = $('#dataTables-main').DataTable();
@@ -204,16 +212,27 @@
         } );
 
         $('#send_data').on('click', function(e){
-            console.log("test");
+            var class_name_select = $('#select_class').val();
+            var class_name_input = $('input[name=dataset_name]').val();
+            var dataset_name = "";
+            if(!jQuery.trim(class_name_select) == "" && jQuery.trim(class_name_input) == ""){
+                dataset_name = class_name_select;
+            }else if(jQuery.trim(class_name_select) == "" && jQuery.trim(class_name_input) == ""){
+                alert("請選擇儲存資料及或新增資料集");
+            }else{
+                dataset_name = class_name_input;
+            }
             var postItems = new Array();
             $("input[name=postItem]:checked").each(function() {
                 postItems.push($(this).val());
             });
+            console.log(postItems);
+            console.log(dataset_name);
             console.log(postItems)
             $.post(
                 '/save_post', {
                     'posts': postItems,
-                    'dataset_name': $('input[name=dataset_name]').val()
+                    'dataset_name': dataset_name
                 }, function () {
                     $('.success_msg').append("Vote Successfully Recorded").fadeOut();
                     alert("已儲存！")

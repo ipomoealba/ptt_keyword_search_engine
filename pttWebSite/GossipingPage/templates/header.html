@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/1999/xhtml">
 
 <head>
-    <meta charset="utf-8">
+    <meta content="Ptt Search Engine with tools by chen hua wei" charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="ptt keyword search engine">
@@ -10,7 +10,7 @@
     <title>PTT 關鍵字搜尋</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/bootstrap-theme.min.css' %}">
-    <link rel="stylesheet" href="{% static 'css/bootstrap-datetimepicker.css'%}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-datetimepicker.css' %}">
     <link rel="stylesheet" href="{% static 'css/rwdtable.css' %}">
     <link rel="stylesheet" href="{% static 'vendor/datatables-plugins/dataTables.bootstrap.css' %}">
     <!-- DataTables Responsive CSS -->
@@ -21,189 +21,206 @@
         body {
             padding-top: 65px;
         }
+
+        .inline-form {
+            display: inline;
+        }
     </style>
 
 </head>
 
 <body>
-    <script type="javascript">
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="">
+                PTT 鄉民檢索系統 beta 2.0
+            </a>
+        </div>
+        <div>
 
-    </script>
-    <nav class="navbar navbar-default navbar-fixed-top">
-        <div class="container-fluid">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="">
-                    PTT 鄉民檢索系統 beta 1.0
-                </a>
-
-            </div>
-            <div>
+            <form id="FolderForm" action="/myFolder" class="inline-form" method="post">
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a data-toggle="tab" href="#"><span class="glyphicon glyphicon-user"></span> {{ user.username }}</a>
+                    <li><a data-toggle="tab" href=""><span class="glyphicon glyphicon-user"></span> {{ user.username }}
+                    </a>
                     </li>
-                    <li>
-                        <form action="/myFolder"method="post">
-                            {%csrf_token%}
-                            <a href="javascript:;" onclick="parentNode.submit();">
-                                <span class="glyphicons glyphicons-notes-2">資料夾</span>
-                            </a>
-                        </form>
+                    <li onclick="FolderForm.submit();">
+                        {% csrf_token %}
+                        <a data-toggle="tab">
+                            <span class="glyphicon glyphicon-list-alt"></span>
+                            資料夾
+                        </a>
                     </li>
                     <li>
                         <a href="{% url 'logout' %}">
                             <span class="glyphicon glyphicon-log-out"></span> Log out</a>
                     </li>
                 </ul>
-            </div>
-        </nav>
-        <div class="col-sm-4 col-md-3 sidebar">
-            {% if request.user.is_authenticated %}
-            <ul class="nav nav-sidebar">
-                <form action="/" METHOD="post" id="finder">
-                    {% csrf_token %}
-                    <label for="exampleSelect2">時間檢索</label>
-                    <div class="form-group">
-                        <h5>From</h5>
-                        <div class="form-group">
-                            <div class='input-group date' id='datetimepicker6'>
-                                <input type='text' class="form-control" id="start_day" name="start_day" />
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
-                            <input type="hidden" id="dtp_input1" value="" /><br/>
-                        </div>
-                        <h5>To</h5>
-                        <div class="form-group">
-                            <div class='input-group date' id='datetimepicker7'>
-                                <input type='text' class="form-control" id="end_day" name="end_day" />
-                                <span class="input-group-addon">
-                                    <span class="glyphicon glyphicon-calendar"></span>
-                                </span>
-                            </div>
-                            <input type="hidden" id="dtp_input1" value="" /><br/>
-                        </div>
-                        <div class="form-group">
-                            <label for="exampleSelect2">文章分類</label>
-                            <select class="form-control" id="articleClass" name="articleClass">
-                                <option>[全選]</option>
-                                <option>[公告]</option>
-                                <option>[新聞]</option>
-                                <option>[爆卦]</option>
-                                <option>[問卦]</option>
-                                <option>[ＦＢ]</option>
-                            </select>
-                        </div>
 
-                        <div class="form-group">
-                            <label for="arthorID">作者 ID</label>
-                            <input type="text" class="form-control" name="arthorID" id="arthorID" placeholder="輸入作者ID">
-                        </div>
-                        <div class="form-group">
-                            <label for="keyword1">關鍵字(AND)</label>
-                            <div class="input_fields_wrap1 ">
-                                <div class="col-sm-10"><input type="text" class="form-control" name="keywordAND[]" id="keyword1" placeholder="關鍵字(AND)" required="required"></div>
-                                <div class="col-sm-2"><span class="glyphicon glyphicon-plus add_field_button1" style="font-size: 20px;"></span></div>
-                            </div>
-                        </div>
-                        <br/>
-                        <br/>
-                        <div class="form-group">
-                            <label for="keyword1">關鍵字(OR)</label>
-                            <div class="input_fields_wrap2 ">
-                                <div class="col-sm-10"><input type="text" class="form-control" name="keywordOR[]" id="keyword1" placeholder="關鍵字(OR)" required="required"></div>
-                                <div class="col-sm-2"><span class="glyphicon glyphicon-plus add_field_button2" style="font-size: 20px;"></span></div>
-                            </div>
-                        </div>
-                        <br/>
-                        <br/>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                </ul>
-                <br />
-            </nav>
-            <form action="/add_new_keyword/" METHOD="post" id="finder">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="new_word">新增關鍵字</label>
-                    <input type="text" class="form-control" name="new_word" id="new_word" placeholder="輸入新關鍵字">
-                </div>
-                <div class="form-group">
-                    <label for="exampleSelect2">類別</label>
-                    <select class="form-control" id="keywordClass" name="keywordClass">
-                        <option>人名</option>
-                        <option>地名</option>
-                        <option>火星文</option>
-                        <option>時事</option>
-                        <option>鄉民專用詞</option>
-                        <option>潮流</option>
-                        <option>其他</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-success">Submit</button>&nbsp&nbsp{%if add_sucess == 1 %}<label style="color:green">成功</label>{% elif add_sucess == 0 %}<label style="color:blue">失敗囉XD（有人比你先）</label>{% endif %}
             </form>
-            <nav aria-label="...">
-                <ul class="pager">
-                    <li class="previous"><span aria-hidden="true" onclick="history.back()">&larr; Older</span></li>
-                </ul>
+        </div>
+    </div>
+</nav>
+<div class="col-sm-4 col-md-3 sidebar">
+    {% if request.user.is_authenticated %}
+        <ul class="nav nav-sidebar">
+            <form action="/" METHOD="post" id="finder">
+                {% csrf_token %}
+                <label for="exampleSelect2">時間檢索</label>
+                <div class="form-group">
+                    <h5>From</h5>
+                    <div class="form-group">
+                        <div class='input-group date' id='datetimepicker6'>
+                            <input type='text' class="form-control" id="start_day" name="start_day"/>
+                            <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+                        </div>
+                        <input type="hidden" id="dtp_input1" value=""/><br/>
+                    </div>
+                    <h5>To</h5>
+                    <div class="form-group">
+                        <div class='input-group date' id='datetimepicker7'>
+                            <input type='text' class="form-control" id="end_day" name="end_day"/>
+                            <span class="input-group-addon">
+                                    <span class="glyphicon glyphicon-calendar"></span>
+              </span>
+                        </div>
+                        <input type="hidden" id="dtp_input1" value=""/><br/>
+                    </div>
+                    <div class="form-group">
+                        <label for="exampleSelect2">文章分類</label>
+                        <select class="form-control" id="articleClass" name="articleClass">
+                            <option>[全選]</option>
+                            <option>[公告]</option>
+                            <option>[新聞]</option>
+                            <option>[爆卦]</option>
+                            <option>[問卦]</option>
+                            <option>[ＦＢ]</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="arthorID">作者 ID</label>
+                        <input type="text" class="form-control" name="arthorID" id="arthorID" placeholder="輸入作者ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="keyword1">關鍵字(AND)</label>
+                        <div class="input_fields_wrap1 ">
+                            <div class="col-sm-10"><input type="text" class="form-control" name="keywordAND[]"
+                                                          id="keyword1" placeholder="關鍵字(AND)" required="required">
+                            </div>
+                            <div class="col-sm-2"><span class="glyphicon glyphicon-plus add_field_button1"
+                                                        style="font-size: 20px;"></span></div>
+                        </div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <div class="form-group">
+                        <label for="keyword1">關鍵字(OR)</label>
+                        <div class="input_fields_wrap2 ">
+                            <div class="col-sm-10"><input type="text" class="form-control" name="keywordOR[]"
+                                                          id="keyword1" placeholder="關鍵字(OR)" required="required"></div>
+                            <div class="col-sm-2"><span class="glyphicon glyphicon-plus add_field_button2"
+                                                        style="font-size: 20px;"></span></div>
+                        </div>
+                    </div>
+                    <br/>
+                    <br/>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
 
+        </ul>
+        <br/>
+        </nav>
+        <form action="/add_new_keyword/" METHOD="post" id="finder">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="new_word">新增關鍵字</label>
+                <input type="text" class="form-control" name="new_word" id="new_word" placeholder="輸入新關鍵字">
             </div>
-            {% endif %}
-            <script src="http://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA=" crossorigin="anonymous"></script>
-            <script src="{% static 'js/bootstrap.min.js' %}"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/webshim/1.16.0/dev/polyfiller.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
-            <script type="text/javascript">
-                $(function() {
-                    $('#datetimepicker6').datetimepicker();
-                    $('#datetimepicker7').datetimepicker({
-                        useCurrent: false //Important! See issue #1075
-                    });
-                    $("#datetimepicker6").on("dp.change", function(e) {
-                        $('#datetimepicker7').data("DateTimePicker").minDate(e.date);
-                    });
-                    $("#datetimepicker7").on("dp.change", function(e) {
-                        $('#datetimepicker6').data("DateTimePicker").maxDate(e.date);
-                    });
-                });
-            </script>
-            <script>
-                $(document).ready(function() {
-                    var max_fields = 10; //maximum input boxes allowed
-                    var wrapper1 = $(".input_fields_wrap1"); //Fields wrapper
-                    var add_button1 = $(".add_field_button1"); //Add button ID
-                    var wrapper2 = $(".input_fields_wrap2"); //Fields wrapper
-                    var add_button2 = $(".add_field_button2"); //Add button ID
-                    var x = 1; //initlal text box count
-                    var y = 1;
-                    $(add_button1).click(function(e) { //on add input button click
-                        e.preventDefault();
-                        if (x < max_fields) { //max input box allowed
-                            x++; //text box increment
-                            $(wrapper1).append(
-                                '<div><br/><br/><div class="col-sm-10"><input type="text" class="form-control" name="keywordOR[]" id="keyword1" placeholder="關鍵字(AND)" required="required"></div><div class="col-sm-2"><span class="remove_field glyphicon glyphicon-minus" style="font-size: 20px; text-align:left;"></span></div></div>'
-                            ); //add input box
-                        }
-                    });
-                    $(add_button2).click(function(e) { //on add input button click
-                        e.preventDefault();
-                        if (y < max_fields) { //max input box allowed
-                            y++; //text box increment
-                            $(wrapper2).append(
-                                '<div><br/><br/><div class="col-sm-10"><input type="text" class="form-control" name="keywordOR[]" id="keyword1" placeholder="關鍵字(OR)" required="required"></div><div class="col-sm-2"><span class="remove_field glyphicon glyphicon-minus" style="font-size: 20px; text-align:left;"></span></div></div>'
-                            ); //a
-                        }
-                    });
-                    $(wrapper1).on("click", ".remove_field", function(e) { //user click on remove text
-                        e.preventDefault();
-                        $(this).parents().eq(1).remove();
-                        x--;
-                    })
-                    $(wrapper2).on("click", ".remove_field", function(e) { //user click on remove text
-                        e.preventDefault();
-                        $(this).parents().eq(1).remove();
-                        x--;
-                    })
-                });
-            </script>
+            <div class="form-group">
+                <label for="exampleSelect2">類別</label>
+                <select class="form-control" id="keywordClass" name="keywordClass">
+                    <option>人名</option>
+                    <option>地名</option>
+                    <option>火星文</option>
+                    <option>時事</option>
+                    <option>鄉民專用詞</option>
+                    <option>潮流</option>
+                    <option>其他</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-success">Submit</button>
+            &nbsp&nbsp{% if add_sucess == 1 %}<label style="color:green">成功</label>{% elif add_sucess == 0 %}
+            <label style="color:blue">失敗囉XD（有人比你先）</label>{% endif %}
+        </form>
+        <nav aria-label="...">
+            <ul class="pager">
+                <li class="previous"><span aria-hidden="true" onclick="history.back()">&larr; Older</span></li>
+            </ul>
+        </nav>
 
+    {% endif %}
+    <script src="http://code.jquery.com/jquery-3.1.1.js" integrity="sha256-16cdPddA6VdVInumRGo6IbivbERE8p7CQR3HzTBuELA="
+            crossorigin="anonymous"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webshim/1.16.0/dev/polyfiller.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(function () {
+                $('#datetimepicker6').datetimepicker();
+                $('#datetimepicker7').datetimepicker({
+                    useCurrent: false //Important! See issue #1075
+                });
+                $("#datetimepicker6").on("dp.change", function (e) {
+                    $('#datetimepicker7').data("DateTimePicker").minDate(e.date);
+                });
+                $("#datetimepicker7").on("dp.change", function (e) {
+                    $('#datetimepicker6').data("DateTimePicker").maxDate(e.date);
+                });
+            });
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            var max_fields = 10; //maximum input boxes allowed
+            var wrapper1 = $(".input_fields_wrap1"); //Fields wrapper
+            var add_button1 = $(".add_field_button1"); //Add button ID
+            var wrapper2 = $(".input_fields_wrap2"); //Fields wrapper
+            var add_button2 = $(".add_field_button2"); //Add button ID
+            var x = 1; //initlal text box count
+            var y = 1; //initlal text box count
+            $(add_button1).click(function (e) { //on add input button click
+                e.preventDefault();
+                if (x < max_fields) { //max input box allowed
+                    x++; //text box increment
+                    $(wrapper1).append(
+                        '<div><br/><br/><div class="col-sm-10"><input type="text" class="form-control" name="keywordOR[]" id="keyword1" placeholder="關鍵字(AND)" required="required"></div><div class="col-sm-2"><span class="remove_field glyphicon glyphicon-minus" style="font-size: 20px; text-align:left;"></span></div></div>'
+                    ); //add input box
+                }
+            }); // text box add
+            $(add_button2).click(function (e) { //on add input button click
+                e.preventDefault();
+                if (y < max_fields) { //max input box allowed
+                    y++; //text box increment
+                    $(wrapper2).append(
+                        '<div><br/><br/><div class="col-sm-10"><input type="text" class="form-control" name="keywordOR[]" id="keyword1" placeholder="關鍵字(OR)" required="required"></div><div class="col-sm-2"><span class="remove_field glyphicon glyphicon-minus" style="font-size: 20px; text-align:left;"></span></div></div>'
+                    ); //a
+                }
+            });
+            $(wrapper1).on("click", ".remove_field", function (e) { //user click on remove text
+                e.preventDefault();
+                $(this).parents().eq(1).remove();
+                x--;
+            }) // text box remove
+            $(wrapper2).on("click", ".remove_field", function (e) { //user click on remove text
+                e.preventDefault();
+                $(this).parents().eq(1).remove();
+                x--;
+            })
+        });
+    </script>
+</div>

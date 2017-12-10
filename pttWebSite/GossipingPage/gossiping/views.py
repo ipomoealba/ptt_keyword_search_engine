@@ -1,33 +1,31 @@
 # -*- coding: utf-8 -*-
-import uuid
-import os
-import re
 import json
-from bson import json_util
+import logging
 import operator
+import os
+import subprocess
 import sys
 import traceback
-import subprocess
-import logging
-
-from functools import reduce
-from collections import OrderedDict
+import uuid
 from collections import Counter
+from collections import OrderedDict
 from datetime import datetime
-from django.contrib.auth import authenticate
-from datetime import timedelta, date, datetime
-from django.shortcuts import render, render_to_response, redirect
-from .models import UserSavePost, Gossiping, GossipingContent, Keywords, GossipingReply, Newkeywords
-from django.db.models import Q
-from GossipingPage import settings
-from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib import auth
-from django.contrib.auth.decorators import login_required
-from operator import __or__ as OR
-from operator import __and__ as AND
+from datetime import timedelta
+from functools import reduce
 from hashlib import md5
+from operator import __and__ as AND
+from operator import __or__ as OR
+
+from bson import json_util
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from django.http import HttpResponse, HttpResponseRedirect
+from django.shortcuts import render
+
+from .models import UserSavePost, Gossiping, GossipingContent, GossipingReply, Newkeywords
 
 logger = logging.getLogger(__name__)
+
 
 @login_required
 def myFolder(request):
@@ -37,13 +35,14 @@ def myFolder(request):
         user_save_post_class = []
         for u in user_save_post:
             user_save_post_class.append(u.class_id)
-        
+
         return render(request, "myFolder.html", {
             "user_save_post_class": set(user_save_post_class),
-            "user_save_post":user_save_post
+            "user_save_post": user_save_post
 
-            })
+        })
     return HttpResponse(status=404)
+
 
 @login_required
 def save_post(request):
@@ -51,11 +50,13 @@ def save_post(request):
         user_id = request.user.id
         data = request.POST.getlist("posts[]")
         dataset_name = request.POST.get("dataset_name")
-        logger.info("[%s] Save Data (%s) to %s " % (user_id, data, dataset_name))
+        logger.info("[%s] Save Data (%s) to %s " %
+                    (user_id, data, dataset_name))
         for p in data:
             pid = p.split("||")[0]
             post_name = p.split("||")[1]
-            s = UserSavePost(pid=pid, user_id=user_id,class_id=dataset_name, post_name=post_name)
+            s = UserSavePost(pid=pid, user_id=user_id,
+                             class_id=dataset_name, post_name=post_name)
             s.save()
         payload = {'success': True}
     return HttpResponse(json.dumps(payload), content_type='application/json')
@@ -66,6 +67,7 @@ def home(request):
     def change_date_form(_date):
         _time_query = datetime.strptime(_date, '%Y-%m-%d %H:%M')
         return _time_query
+
     if request.POST:
         start_time = request.POST['start_day']
         end_time = request.POST['end_day']
@@ -117,10 +119,8 @@ def home(request):
             raw_data = Gossiping.objects.filter(reduce(AND, sql_query))
         elif (sql_query == [] and or_query != []):
             raw_data = Gossiping.objects.filter(reduce(OR, or_query))
-        # print([r.ptime.date() for r in raw_data])
         month_date_freq = {}
         week_date_freq = {}
-        # numdays = 30
         if new_start_time:
             base = new_end_time
         else:
@@ -129,18 +129,18 @@ def home(request):
             month_date_freq[(base - timedelta(days=x)).date()] = 0
         for x in range(0, 7):
             week_date_freq[(base - timedelta(days=x)).date()] = 0
-        # print(date_list)
         for r in raw_data:
             if r.ptime.date() in list(month_date_freq.keys()):
                 month_date_freq[r.ptime.date()] = month_date_freq[
-                    r.ptime.date()] + 1
+                                                      r.ptime.date()] + 1
             if r.ptime.date() in list(week_date_freq.keys()):
                 week_date_freq[r.ptime.date()] = week_date_freq[
-                    r.ptime.date()] + 1
+                                                     r.ptime.date()] + 1
 
         def sort_dict_data(data):
             return OrderedDict((datetime.strftime(k, '%d-%m-%Y'), v)
-                               for k, v in sorted(data.iteritems()))
+                               for k, v in sorted(data.items()))
+
         all_month_date_freq = sort_dict_data(month_date_freq)
         all_week_date_freq = sort_dict_data(week_date_freq)
         filename = str(uuid.uuid1())
@@ -155,15 +155,16 @@ def home(request):
             json.dump(all_week_date_freq, outfile, default=json_util.default)
         code_file = os.path.join('lib/graph.py')
         process_month = subprocess.Popen(
-            ['python2', code_file, str(all_month_date_freq), filename, "month"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ['python2', code_file, str(all_month_date_freq), filename, "month"], stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
 
         out1, err1 = process_month.communicate()
         process_week = subprocess.Popen(
-            ['python2', code_file, str(all_week_date_freq), filename, "week"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            ['python2', code_file, str(all_week_date_freq), filename, "week"], stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
 
         out2, err2 = process_week.communicate()
-        print(out1 + "\n" + out2)
-        print(err1, err2)
+        logger.info(err1, err2)
         content_result = {}
         reply_result = {}
         for i in raw_data:
@@ -172,8 +173,7 @@ def home(request):
             if i.sheee == None or i.arrow == None or i.push == None:
                 i.all_reply = "err"
             else:
-                i.all_reply = i.sheee+i.push+i.arrow
-            print(i.all_reply)
+                i.all_reply = i.sheee + i.push + i.arrow
             for ck in content_keywords[2:len(content_keywords) - 2].split('], ['):
                 ckeyword = ck.split(', ')
                 if ckeyword[0] in content_result:
@@ -204,9 +204,8 @@ def home(request):
         img_list = os.path.join("cache/urls/" + filename + ".txt")
         urls = {"all_content": "static/cache/img/month/" + filename + ".png",
                 "all_reply": "static/cache/img/week/" + filename + ".png", }
-        print(urls)
-        post_classes = [u.class_id for u in UserSavePost.objects.filter(user_id=request.user.id)]
-        print(post_classes)
+        post_classes = [u.class_id for u in UserSavePost.objects.filter(
+            user_id=request.user.id)]
         return render(request, 'home.html', {'all_data': raw_data,
                                              'all_reply_counter': _all_reply_counter[:100],
                                              'all_content_counter': _all_content_counter[:200],
@@ -222,8 +221,6 @@ def home(request):
 
 @login_required()
 def add_new_keyword(request):
-    # add_type = 0
-
     def _get_urlmd5id(keyword):
         return md5(keyword).hexdigest()
 
@@ -263,7 +260,8 @@ def result(request):
             reply_result = Counter()
             re_content_result = Counter()
             re_reply_result = Counter()
-            reply_raw = GossipingReply.objects.get(pid=request.GET['pid']).reply
+            reply_raw = GossipingReply.objects.get(
+                pid=request.GET['pid']).reply
             for ck in content_keywords[2:len(content_keywords) - 2].split('], ['):
                 ckeyword = ck.split(', ')
                 if ckeyword[0] in content_result:
@@ -324,8 +322,7 @@ def result(request):
                 tmp = reply_raw[2:-2].split('}, {')
                 for i, w in enumerate(tmp):
                     reply.append([
-                        w[w.index(""", "push_tag": """) + len(""", "push_tag": \"""")
-                          :w.index("""", "push_date":""")],
+                        w[w.index(""", "push_tag": """) + len(""", "push_tag": \""""):w.index("""", "push_date":""")],
                         w[w.index(""", "push_user": """) +
                           len(""", "push_user": \""""):w.index("""", "push_tag""")],
                         w[w.index("""push_content": ":""") +
@@ -341,7 +338,8 @@ def result(request):
             ), key=operator.itemgetter(1), reverse=True)[:25]
             post.re_sorted_reply = sorted(re_reply_result.items(
             ), key=operator.itemgetter(1), reverse=True)[:50]
-            post.content = GossipingContent.objects.get(pid=request.GET['pid']).content
+            post.content = GossipingContent.objects.get(
+                pid=request.GET['pid']).content
             print(post.push)
             return render(request, 'result.html', {'post': post, 're_post': re_post, 'reply': reply})
         else:
