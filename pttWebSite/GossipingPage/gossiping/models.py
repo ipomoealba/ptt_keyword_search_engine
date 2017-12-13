@@ -214,13 +214,26 @@ class SexReply(models.Model):
         db_table = 'Sex_Reply'
 
 
+class UserSavePostAnalysisData(models.Model):
+    class_id = models.CharField(max_length=32)
+    user_id = models.CharField(max_length=32)
+    result = models.CharField(max_length=100)
+    fileType = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'User_Save_Post_analysis_data'
+
+
 class UserSavePost(models.Model):
-    pid = models.CharField(max_length=32, primary_key=True)
+    id = models.CharField(max_length=32, primary_key=True)
+    pid = models.CharField(max_length=32)
     user_id = models.CharField(max_length=32)
     class_id = models.CharField(max_length=100)
     update_time = models.DateTimeField(auto_now=True)
-    create_time = models.DateTimeField(auto_now_add=True)
+    create_time = models.DateTimeField(auto_now=True)
     post_name = models.CharField(max_length=100, blank=True, null=True)
+    keywords = models.CharField(max_length=1000)
 
     class Meta:
         managed = False
@@ -299,7 +312,8 @@ class DjangoAdminLog(models.Model):
     object_repr = models.CharField(max_length=200)
     action_flag = models.SmallIntegerField()
     change_message = models.TextField()
-    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
+    content_type = models.ForeignKey(
+        'DjangoContentType', models.DO_NOTHING, blank=True, null=True)
     user = models.ForeignKey(AuthUser, models.DO_NOTHING)
 
     class Meta:

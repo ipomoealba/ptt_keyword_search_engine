@@ -7,6 +7,7 @@ import subprocess
 import sys
 import traceback
 import uuid
+
 from collections import Counter
 from collections import OrderedDict
 from datetime import datetime
@@ -22,9 +23,78 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 
-from .models import UserSavePost, Gossiping, GossipingContent, GossipingReply, Newkeywords
+from .utilities import chinese_comma_split, sort_dict_data, cal_sentiment
+from .models import UserSavePostAnalysisData, UserSavePost, Gossiping, GossipingContent, GossipingReply, Newkeywords
 
 logger = logging.getLogger(__name__)
+
+
+@login_required
+def motion(request):
+    class_id = request.GET['class_id']
+    user_id = request.user.id
+
+    negetive_motion_graph = UserSavePostAnalysisData.objects.filter(
+        user_id=user_id, class_id=class_id)
+    # print(negetive_motion_graph.count())
+    if negetive_motion_graph.count() > 0:
+        print(negetive_motion_graph[0].user_id)
+        filename = negetive_motion_graph[0].result
+    else:
+        user_save_post = UserSavePost.objects.filter(
+            user_id=user_id, class_id=class_id)
+        keywords = user_save_post[0].keywords.split("|#$|")
+        usps = []
+        negative_results = {}
+        # positive_results = {}
+        # all_results = {}
+        for usp in user_save_post:
+            content = GossipingContent.objects.filter(pid=usp.pid)[0].content
+            article_date = str(Gossiping.objects.filter(
+                pid=usp.pid)[0].ptime).split(" ")[0]
+            for keyword in keywords:
+                if article_date not in negative_results.keys():
+                    negative_results[article_date] = cal_sentiment(
+                        content, keyword, "n", normalize=False)
+                    # positive_results[article_date] = cal_sentiment(
+                    # content, keyword, "p", normalize=False)
+                    # all_results[article_date] = cal_sentiment(
+                    #     content, keyword, normalize=False)
+                else:
+                    negative_results[article_date] += cal_sentiment(
+                        content, keyword, "n", normalize=False)
+                    # positive_results[article_date] += cal_sentiment(
+                    #     content, keyword, "p", normalize=False)
+                    # all_results[article_date] += cal_sentiment(
+                    #     content
+# , keyword, normalize=False)
+        # print(negative_results)
+        filename = str(uuid.uuid1())
+        negative_data_file = os.path.join(
+            "cache/data/negative/" + filename + ".json")
+
+        with open(negative_data_file, 'w') as outfile:
+            json.dump(negative_results, outfile,
+                      default=json_util.default)
+
+        code_file = os.path.join('lib/motion_graph.py')
+        process_month = subprocess.Popen(
+            ['python2', code_file, str(negative_results), filename, "negative"], stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+
+        out1, err1 = process_month.communicate()
+        print(err1)
+        print(out1)
+        # process_week = subprocess.Popen(
+        #     ['python2', code_file, str(all_week_date_freq), filename, "week"], stdout=subprocess.PIPE,
+        #     stderr=subprocess.PIPE)
+
+        # print(positive_results)
+        new_record = UserSavePostAnalysisData(class_id=class_id, user_id=user_id, result=filename, fileType="ng")
+        new_record.save()
+    return render(request, "analysis.html", {
+        "negative_img": "/static/cache/img/negative/" + filename + ".png"
+    })
 
 
 @login_required
@@ -33,6 +103,7 @@ def myFolder(request):
         user_id = request.user.id
         user_save_post = UserSavePost.objects.filter(user_id=user_id)
         user_save_post_class = []
+
         for u in user_save_post:
             user_save_post_class.append(u.class_id)
 
@@ -49,14 +120,19 @@ def save_post(request):
     if request.POST:
         user_id = request.user.id
         data = request.POST.getlist("posts[]")
+        keywords = "|#$|".join(
+            request.session['keywordORs'] + request.session['keywordANDs'])
         dataset_name = request.POST.get("dataset_name")
         logger.info("[%s] Save Data (%s) to %s " %
                     (user_id, data, dataset_name))
         for p in data:
+            _id = str(uuid.uuid1())[:32]
             pid = p.split("||")[0]
             post_name = p.split("||")[1]
-            s = UserSavePost(pid=pid, user_id=user_id,
-                             class_id=dataset_name, post_name=post_name)
+
+            s = UserSavePost(id=_id, pid=pid, user_id=user_id,
+                             class_id=dataset_name, post_name=post_name, keywords=keywords)
+
             s.save()
         payload = {'success': True}
     return HttpResponse(json.dumps(payload), content_type='application/json')
@@ -69,12 +145,15 @@ def home(request):
         return _time_query
 
     if request.POST:
-        start_time = request.POST['start_day']
-        end_time = request.POST['end_day']
-        arthor = request.POST['arthorID']
-        keywordANDs = request.POST.getlist('keywordAND[]')
-        keywordORs = request.POST.getlist('keywordOR[]')
-        article_class = request.POST['articleClass']
+        request.session['start_day'] = start_time = request.POST['start_day']
+        request.session['end_day'] = end_time = request.POST['end_day']
+        request.session['author'] = arthor = request.POST['arthorID']
+        request.session['keywordANDs'] = keywordANDs = request.POST.getlist(
+            'keywordAND[]')
+        request.session['keywordORs'] = keywordORs = request.POST.getlist(
+            'keywordOR[]')
+        request.session['article_class'] = article_class = request.POST['articleClass']
+
         sql_query = []
         or_query = []
         new_start_time = None
@@ -132,10 +211,10 @@ def home(request):
         for r in raw_data:
             if r.ptime.date() in list(month_date_freq.keys()):
                 month_date_freq[r.ptime.date()] = month_date_freq[
-                                                      r.ptime.date()] + 1
+                    r.ptime.date()] + 1
             if r.ptime.date() in list(week_date_freq.keys()):
                 week_date_freq[r.ptime.date()] = week_date_freq[
-                                                     r.ptime.date()] + 1
+                    r.ptime.date()] + 1
 
         def sort_dict_data(data):
             return OrderedDict((datetime.strftime(k, '%d-%m-%Y'), v)
@@ -159,11 +238,13 @@ def home(request):
             stderr=subprocess.PIPE)
 
         out1, err1 = process_month.communicate()
+        print(err1)
         process_week = subprocess.Popen(
             ['python2', code_file, str(all_week_date_freq), filename, "week"], stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
 
         out2, err2 = process_week.communicate()
+        print(err2)
         logger.info(err1, err2)
         content_result = {}
         reply_result = {}
@@ -177,6 +258,7 @@ def home(request):
             for ck in content_keywords[2:len(content_keywords) - 2].split('], ['):
                 ckeyword = ck.split(', ')
                 if ckeyword[0] in content_result:
+                    #  print(u"".join(ckeyword[0]))
                     content_result[ckeyword[0]] += int(ckeyword[1])
                 elif ckeyword[0] != '' and len(ckeyword[0]) > 3:
                     content_result[ckeyword[0]] = int(ckeyword[1])
@@ -207,8 +289,8 @@ def home(request):
         post_classes = [u.class_id for u in UserSavePost.objects.filter(
             user_id=request.user.id)]
         return render(request, 'home.html', {'all_data': raw_data,
-                                             'all_reply_counter': _all_reply_counter[:100],
-                                             'all_content_counter': _all_content_counter[:200],
+                                             'all_reply_counter': _all_reply_counter,
+                                             'all_content_counter': _all_content_counter,
                                              'urls': urls,
                                              'post_classes': set(post_classes)
                                              })

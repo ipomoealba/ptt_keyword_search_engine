@@ -1,0 +1,42 @@
+{% load staticfiles %} {% include 'header.html' %}
+<style>
+  .row {
+    margin-top: 40px;
+    padding: 0 10px;
+  }
+
+  .clickable {
+    cursor: pointer;
+  }
+
+  .panel-heading span {
+    margin-top: -20px font-size: 15px;
+  }
+</style>
+
+<div class="col-md-1">
+</div>
+<div class="col-md-6">
+  <div>
+    <h2>負面情緒關鍵字權重折線圖</h2>
+  </div>
+  <div id="motion-result">
+    <img src="{{negative_img}}" </div>
+  </div>
+</div>
+</div>
+<script>
+  $(document).on('click', '.panel-heading span.clickable', function(e) {
+    var $this = $(this);
+    if (!$this.hasClass('panel-collapsed')) {
+      $this.parents('.panel').find('.panel-body').slideUp();
+      $this.addClass('panel-collapsed');
+      $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+    } else {
+      $this.parents('.panel').find('.panel-body').slideDown();
+      $this.removeClass('panel-collapsed');
+      $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+    }
+  })
+</script>
+{% include 'footer.html' %}
