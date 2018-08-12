@@ -1,0 +1,132 @@
+{% load staticfiles %} {% include 'header.html' %}
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+<div class="col-md-9">
+<form>
+    <div class="form-group" action="/analysis_result" method="get">
+        <label for="exampleInputEmail1">設定時間區間</label>
+        <input type="text" class="form-control" name="interval">
+        <input type="hidden" value="{{class_id}}" name="class_id">
+        <input type="hidden" value="{{user.id}}" name="user_id">
+        <small id="emailHelp" class="form-text text-muted">以幾天為單位計算關鍵字飄移</small>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+<form>
+        <div class="form-group" action="/analysis_result" method="get">
+            <label for="exampleInputEmail1">顯示前幾順位</label>
+            <input type="text" class="form-control" name="ranking">
+            <input type="hidden" value="{{class_id}}" name="class_id">
+            <input type="hidden" value="{{user.id}}" name="user_id">
+            <small id="emailHelp" class="form-text text-muted">預設前十順位</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+{% for result in results %}
+<div style="overflow: auto; width: 100%; height: 100%;"> 
+    <h3>以{{result.2}}天為基準之飄移狀態</h3>
+    <table align="center"  style="margin: 0px auto;" width="100%" class="display dataTable no-footer" cellspacing="0" id="dataTables-main">
+        <thead>
+            <tr>
+                <th style="width: 10%"><strong>時間區間</strong></th>
+                <th nowrap="nowrap"><strong>定義區間 </strong></th>
+                {% for i in result.1.0.1 %}
+                <th>順位{{forloop.counter}}</th>
+                <th>加權結果</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                {% for datetime in result.0 %}
+                    <tr>
+                        <td rowspan="3" nowrap="nowrap">{{ datetime.0 }} <br>&nbsp;&nbsp;&nbsp;~&nbsp;&nbsp;&nbsp;<br> {{datetime.1}}</td>
+                        <td><strong>本文</strong></td>
+                        {% for keyword_list in result.1 %} {% if forloop.counter == forloop.parentloop.counter %} 
+                        {% for keyword in keyword_list.0 %}
+                        <td>{{keyword.0}}</td>
+                        <td>{{keyword.1}}</td>
+                        {% endfor %} {% endif %} {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><strong>回覆</strong></td>
+                        {% for keyword_list in result.1 %} {% if forloop.counter == forloop.parentloop.counter %} {% for keyword in keyword_list.1%}
+                        <td>{{keyword.0}}</td>
+                        <td>{{keyword.1}}</td>
+                        {% endfor %} {% endif %} {% endfor %}
+                    </tr>
+                    <tr>
+                        <td><strong>綜合</strong></td>
+                        {% for keyword_list in result.1 %} {% if forloop.counter == forloop.parentloop.counter %} {% for keyword in keyword_list.2 %}
+                        <td>{{keyword.0}}</td>
+                        <td>{{keyword.1}}</td>
+                        {% endfor %} {% endif %} {% endfor %}
+                    </tr>
+                    <br>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% endfor %}
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var table = $('#dataTables-main').DataTable();
+        $('#dataTables-main tbody').on('click', 'tr', function () {
+            $(this).toggleClass('selected');
+        });
+
+        $("#selectAll").click(function () {
+            //console.log("checkAll");
+            var checkBoxes = $('input[name=postItem]');
+            checkBoxes.prop('checked', !checkBoxes.prop("checked"));
+        });
+        $.ajaxSetup({
+            data: {
+                csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+        });
+        $('#save').click(function () {
+            alert(table.rows('.selected').data().length + ' row(s) selected');
+        });
+
+        $('#send_data').on('click', function (e) {
+            var class_name_select = $('#select_class').val();
+            var class_name_input = $('input[name=dataset_name]').val();
+            console.log("select" + class_name_select);
+            console.log("in" + class_name_input);
+            console.log("trun" + jQuery.trim(class_name_select));
+
+            var dataset_name = "";
+            if (!jQuery.trim(class_name_select) === "" && jQuery.trim(class_name_input) === "") {
+                dataset_name = class_name_select;
+            } else if (jQuery.trim(class_name_select) === "" && jQuery.trim(class_name_input) === "") {
+                alert("請選擇儲存資料及或新增資料集");
+            } else {
+                dataset_name = class_name_input;
+            }
+            var postItems = new Array();
+            $("input[name=postItem]:checked").each(function () {
+                postItems.push($(this).val());
+            });
+            console.log(dataset_name);
+            $.post(
+                '/save_post', {
+                    'posts': postItems,
+                    'dataset_name': dataset_name
+                },
+                function () {
+                    $('.success_msg').append("Vote Successfully Recorded").fadeOut();
+                    alert("已儲存！")
+                }
+            );
+            event.preventDefault();
+
+        });
+    });
+</script>
+{% include 'footer.html' %}

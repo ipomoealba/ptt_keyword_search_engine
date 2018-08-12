@@ -25,14 +25,10 @@ DOWNLOADER_MIDDLEWARES = {
 ROBOTSTXT_OBEY = True
 
 MYSQL_HOST = '127.0.0.1'
-# MYSQL_HOST = '192.168.99.100'
 MYSQL_DBNAME = 'ptt'
 MYSQL_USER = 'root'
 MYSQL_PASSWD = 'tp6cj84jo'
 
-MONGODB_SERVER = "localhost"
-MONGODB_PORT = 27017
-MONGODB_DB = "ptt"
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 # CONCURRENT_REQUESTS = 32
 

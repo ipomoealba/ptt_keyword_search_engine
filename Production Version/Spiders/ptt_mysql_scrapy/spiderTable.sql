@@ -23,14 +23,15 @@ CREATE TABLE `Gossiping`
    PRIMARY KEY(pid)
 );
 
-CREATE TABLE `Content`
+CREATE TABLE `Gossiping_Content`
+
 (
    pid       varchar(30) NOT NULL,
    content   text,
    PRIMARY KEY(pid)
 );
 
-CREATE TABLE `Keywords`
+CREATE TABLE `Gossiping_Keywords`
 (
    pid                varchar(30) NOT NULL,
    content_keywords   text,
@@ -38,9 +39,12 @@ CREATE TABLE `Keywords`
    PRIMARY KEY(pid)
 );
 
-CREATE TABLE `Reply`
+CREATE TABLE `Gossiping_Reply`
 (
    pid     varchar(30) NOT NULL,
    reply   text,
    PRIMARY KEY(pid)
 );
+
+
+
